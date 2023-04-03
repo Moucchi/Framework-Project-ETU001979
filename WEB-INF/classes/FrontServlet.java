@@ -15,6 +15,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
 
 public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> mappingURLS;
@@ -22,8 +23,17 @@ public class FrontServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        ArrayList<String> classNames = getAllClassNames(".\\webapps\\Framework\\WEB-INF\\classes\\");
-        HashMap<String, Mapping> toBeUsed = new HashMap<>();
+        HashMap<String, Mapping> toBeUsed = map();
+
+        this.setMappingURLS(toBeUsed);
+    }
+
+    public HashMap<String, Mapping> map() {
+        HashMap<String, Mapping> result = new HashMap<>();
+
+        String fullPath = getPath();
+
+        ArrayList<String> classNames = getAllClassNames(fullPath);
 
         for (String classs : classNames) {
             try {
@@ -37,7 +47,7 @@ public class FrontServlet extends HttpServlet {
                         mapping.setClassName(temp.getCanonicalName());
                         mapping.setMethod(method.getName());
 
-                        toBeUsed.put(annotation.value(), mapping);
+                        result.put(annotation.value(), mapping);
                     }
                 }
 
@@ -46,11 +56,12 @@ public class FrontServlet extends HttpServlet {
             }
         }
 
-        this.setMappingURLS(toBeUsed);
+        return result;
     }
 
-    protected ArrayList<String> getAllClassNames(String path) {
+    public ArrayList<String> getAllClassNames(String path) {
         ArrayList<String> result = new ArrayList<>();
+        result.add(path);
         File directory = new File(path);
         File[] files = directory.listFiles();
 
@@ -59,12 +70,14 @@ public class FrontServlet extends HttpServlet {
                 String fileName = file.getName();
                 if (fileName.contains(".")) {
                     if (fileName.contains(".class")) {
-                        String toBeAdded = "";
-                        toBeAdded = file.getPath();
-                        toBeAdded = toBeAdded.replace(".\\", "");
+                        String toBeAdded = file.getPath();
                         toBeAdded = toBeAdded.replace(".class", "");
                         toBeAdded = toBeAdded.replace("\\", ".");
-                        toBeAdded = toBeAdded.replace("webapps.Framework.WEB-INF.classes.", "");
+
+                        String temp = getPath();
+                        temp = temp.replace("\\", ".");
+
+                        toBeAdded = toBeAdded.replace(temp, "");
                         result.add(toBeAdded);
                     }
                 } else {
@@ -77,8 +90,26 @@ public class FrontServlet extends HttpServlet {
         return result;
     }
 
+    public String getPath() {
+        String relativePath = "\\WEB-INF\\classes\\";
+        String contextPath = getServletContext().getContextPath();
+
+        contextPath = contextPath.substring(1);
+
+        String fullPath = "webapps\\" + contextPath + relativePath;
+
+        return fullPath;
+    }
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        PrintWriter out = response.getWriter();
+
+        for (String key : this.getMappingURLS().keySet()) {
+            out.println(this.getMappingURLS().get(key).getClassName());
+            out.println(this.getMappingURLS().get(key).getMethod());
+        }
+
         /*
          * String url = request.getServletPath();
          * String requete = request.getQueryString();
@@ -89,14 +120,6 @@ public class FrontServlet extends HttpServlet {
          * RequestDispatcher dispat = request.getRequestDispatcher("url.jsp");
          * dispat.forward(request, response);
          */
-
-        PrintWriter out = response.getWriter();
-
-        out.println("Tonga eh");
-        for (String key : this.getMappingURLS().keySet()) {
-            out.println(this.getMappingURLS().get(key).getClassName());
-            out.println(this.getMappingURLS().get(key).getMethod());
-        }
     }
 
     @Override
