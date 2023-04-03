@@ -2,10 +2,10 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title> fs </title>
+	<title> Framework Java </title>
 </head>
 <body>
-	<h1> Page accueil vers meme servlet </h1>
+	<h1> Index.jsp </h1>
 	<form action="FrontServlet" method="GET"> 
 		<p>
 			<label for="first">Donnee 1 : </label>
