@@ -12,4 +12,5 @@ public class Animal {
 
     @URL( value = "Animal-mourrir" )
     public void die(){}
+    
 }
