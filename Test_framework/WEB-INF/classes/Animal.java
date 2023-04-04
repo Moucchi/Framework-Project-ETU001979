@@ -5,12 +5,24 @@ import etu1979.framework.Annotation.URL;
 public class Animal {
     
     @URL( value = "Animal-manger" )
-    public void eat(){}
+    public ModelView eat(){
+        ModelView result = new ModelView();
+        result.setUrl("/eat.jsp");
+        return result;
+    }
 
     @URL( value = "Animal-dormir" )
-    public void sleep(){}
+    public ModelView sleep(){
+        ModelView result = new ModelView();
+        result.setUrl("/sleep.jsp");
+        return result;
+    }
 
     @URL( value = "Animal-mourrir" )
-    public void die(){}
+    public ModelView die(){
+        ModelView result = new ModelView();
+        result.setUrl("/die.jsp");
+        return result;
+    }
     
 }
