@@ -1,4 +1,4 @@
-package etu1979.framework.model;
+package model.object;
 
 import etu1979.framework.Annotation.URL;
 
