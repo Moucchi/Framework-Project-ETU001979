@@ -1,1 +1,0 @@
-javac -d . .\Test_framework\WEB-INF\classes\Animal.java
