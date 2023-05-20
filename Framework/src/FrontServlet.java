@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import etu1979.framework.Mapping;
+import etu1979.framework.ModelView;
 import etu1979.framework.Annotation.URL;
 
 import jakarta.servlet.RequestDispatcher;
@@ -15,7 +16,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.ServletConfig;
 
 public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> mappingURLS;
@@ -106,24 +106,35 @@ public class FrontServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         String url = request.getServletPath();
         String requete = request.getQueryString();
+        
         if (requete != null) {
             url = url + "?" + requete;
         }
-        ModelView result = null;
+
+        // ModelView result = null;
+
+        out.println("1");
 
         for (String key : this.getMappingURLS().keySet()) {
             out.println(this.getMappingURLS().get(key).getClassName());
             out.println(this.getMappingURLS().get(key).getMethod());
 
-            if( url.contains(key) ){
-                Class resultClass = Class.forName(this.getMappingURLS().get(key).getClassName());
-                result =  resultClass.getDeclaredMethod(this.getMappingURLS().get(key).getMethod(), null).invoke(result, null);
-            }
+            // if( url.contains(key) ){
+            //     Class resultClass ;
+
+            //     try {
+            //         resultClass = Class.forName(this.getMappingURLS().get(key).getClassName());
+            //         result =  (ModelView) resultClass.getDeclaredMethod(this.getMappingURLS().get(key).getMethod(), null).invoke(result, null);
+            //     } catch (Exception e) {
+            //         // TODO: handle exception
+            //     }
+
+            // }
         }
         
-        request.setAttribute("result", result);
-        RequestDispatcher dispat = request.getRequestDispatcher("url.jsp");
-        dispat.forward(request, response);
+        // request.setAttribute("result", result);
+        // RequestDispatcher dispat = request.getRequestDispatcher("url.jsp");
+        // dispat.forward(request, response);
         
     }
 
