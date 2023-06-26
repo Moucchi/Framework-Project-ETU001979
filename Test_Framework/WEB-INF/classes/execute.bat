@@ -1,0 +1,1 @@
+javac -d . Emp.java
