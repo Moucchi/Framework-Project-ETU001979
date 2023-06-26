@@ -1,1 +1,1 @@
-javac -d . Emp.java
+javac -parameters -d Z:\Tools\Intsallation\Tomcat\webapps\Framework-Project-ETU001979\temp_project\WEB-INF\classes\ -cp Z:\Tools\Intsallation\Tomcat\lib\framework.jar *.java
