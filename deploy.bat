@@ -7,6 +7,9 @@ set lib_path=Test_Framework\WEB-INF\lib
 set jsp_path=Test_Framework\jsp
 set web_xml=Test_Framework\WEB-INF\web.xml
 
+REM creation de l'archive jar
+call build.bat
+
 REM Création d'un dossier temporaire
 mkdir temp_project
 
