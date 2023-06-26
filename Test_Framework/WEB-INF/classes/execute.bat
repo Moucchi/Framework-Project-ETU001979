@@ -1,1 +1,3 @@
-javac -parameters -d Z:\Tools\Intsallation\Tomcat\webapps\Framework-Project-ETU001979\temp_project\WEB-INF\classes\ -cp Z:\Tools\Intsallation\Tomcat\lib\framework.jar *.java
+set destination=Z:\Tools\Intsallation\Tomcat\webapps\Framework-Project-ETU001979\temp_project\WEB-INF\classes\
+set lib_path=Z:\Tools\Intsallation\Tomcat\webapps\Framework-Project-ETU001979\Test_Framework\WEB-INF\lib\framework.jar
+javac -parameters -d %destination% -cp %lib_path% *.java
