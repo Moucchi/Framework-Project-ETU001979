@@ -6,11 +6,11 @@
   version="3.1"
   metadata-complete="true">
     <servlet>
-      <servlet-name> FrontServlet </servlet-name>
-      <servlet-class> etu1979.framework.servlet.FrontServlet </servlet-class>
+      <servlet-name>FrontServlet</servlet-name>
+      <servlet-class>etu1979.framework.servlet.FrontServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name> FrontServlet </servlet-name>
-        <url-pattern> /FrontServlet </url-pattern>
+        <servlet-name>FrontServlet</servlet-name>
+        <url-pattern>/FrontServlet</url-pattern>
     </servlet-mapping>
 </web-app>

@@ -67,8 +67,9 @@ public class FrontServlet extends HttpServlet {
 
         if (files != null) {
             for (File file : files) {
-                String fileName = file.getName();
-                if (fileName.contains(".")) {
+                if (!file.isDirectory()) {
+                    String fileName = file.getName();
+
                     if (fileName.contains(".class")) {
                         String toBeAdded = file.getPath();
                         toBeAdded = toBeAdded.replace(".class", "");
@@ -80,11 +81,13 @@ public class FrontServlet extends HttpServlet {
                         toBeAdded = toBeAdded.replace(temp, "");
                         result.add(toBeAdded);
                     }
+                    
                 } else {
                     String subPath = file.getPath();
                     result.addAll(getAllClassNames(subPath));
                 }
             }
+
         }
 
         return result;
