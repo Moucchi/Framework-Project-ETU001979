@@ -1,4 +1,5 @@
-javac -parameters -d . URL.java
-javac -parameters -d . Mapping.java
-javac -parameters -d . URL.java
-javac -parameters -d . FrontServlet.java
+javac -d . ModelView.java
+javac -d . URL.java
+javac -d . Mapping.java
+javac -d . URL.java
+javac -d . FrontServlet.java
