@@ -7,6 +7,10 @@ set lib_path=Test_Framework\WEB-INF\lib
 set jsp_path=Test_Framework\jsp
 set web_xml=Test_Framework\WEB-INF\web.xml
 
+set destination=Z:\Tools\Intsallation\Tomcat\webapps\Framework-Project-ETU001979\temp_project\WEB-INF\classes\
+set lib=Z:\Tools\Intsallation\Tomcat\webapps\Framework-Project-ETU001979\Test_Framework\WEB-INF\lib\framework.jar
+set files=Z:\Tools\Intsallation\Tomcat\webapps\Framework-Project-ETU001979\Test_Framework\WEB-INF\classes\*.java
+
 REM creation de l'archive jar
 call build.bat
 
@@ -21,7 +25,7 @@ xcopy /E %jsp_path%\* temp_project
 xcopy /E %lib_path%\* temp_project\WEB-INF\lib
 
 REM compilation des classes personnalises : 
-javac -parameters -d Z:\Tools\Intsallation\Tomcat\webapps\Framework-Project-ETU001979\temp_project\WEB-INF\classes\ -cp Z:\Tools\Intsallation\Tomcat\lib\framework.jar Z:\Tools\Intsallation\Tomcat\webapps\Framework-Project-ETU001979\Test_Framework\WEB-INF\classes\Emp.java
+javac -parameters -d %destination% -cp %lib%  %files%
 
 REM Copie du fichier web.xml -> temp
 copy %web_xml% temp_project\WEB-INF

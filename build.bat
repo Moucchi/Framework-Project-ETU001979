@@ -7,6 +7,7 @@ set Test_Framework_path=%base_path%\Test_Framework
 set src_path=%framework_path%\src
 set build_path=%framework_path%\build
 set lib_path=%Test_Framework_path%\WEB-INF\lib
+set tomcat_lib_path=Z:\Tools\Intsallation\Tomcat\lib
 
 REM compilation des fichiers sources
 cd %src_path%
@@ -21,6 +22,7 @@ jar cvf framework.jar .\etu1979\*
 
 REM copie de la bibliotheque jar vers le repertoire de librairie du projet test
 xcopy .\framework.jar %lib_path%\ /C /I /Y
+xcopy .\framework.jar %tomcat_lib_path%\ /C /I /Y
 del .\framework.jar
 
 cd Z:\Tools\Intsallation\Tomcat\webapps\Framework-Project-ETU001979

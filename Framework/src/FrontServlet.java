@@ -6,13 +6,16 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import etu1979.framework.Mapping;
 import etu1979.framework.Annotation.URL;
+import etu1979.framework.ModelView;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletMapping;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.ServletConfig;
@@ -81,7 +84,7 @@ public class FrontServlet extends HttpServlet {
                         toBeAdded = toBeAdded.replace(temp, "");
                         result.add(toBeAdded);
                     }
-                    
+
                 } else {
                     String subPath = file.getPath();
                     result.addAll(getAllClassNames(subPath));
@@ -104,25 +107,57 @@ public class FrontServlet extends HttpServlet {
         return fullPath;
     }
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        PrintWriter out = response.getWriter();
+    public String getURL(HttpServletRequest request) {
+        String value = new String();
+        String URI = request.getRequestURI();
+        String context_path = request.getContextPath();
+        value = URI.substring(context_path.length() + 1);
+        return value;
+    }
 
-        for (String key : this.getMappingURLS().keySet()) {
-            out.println(this.getMappingURLS().get(key).getClassName());
-            out.println(this.getMappingURLS().get(key).getMethod());
+    protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        HttpServletMapping mapping = req.getHttpServletMapping();
+        PrintWriter out = resp.getWriter();
+        String key = getURL(req);
+        Mapping map = getMappingURLS().get(key);
+        ModelView modelview = null;
+
+        try {
+            Class<?> process_class = Class.forName(map.getClassName());
+            Object objet = process_class.newInstance();
+            Method method = objet.getClass().getDeclaredMethod(map.getMethod());
+
+            out.println("k : " + key);
+            out.println("Class name : " + map.getClassName());
+            out.println("Method : " + map.getMethod());
+
+            if (method.getReturnType().equals(ModelView.class)) {
+                modelview = (ModelView) method.invoke(objet);
+            }
+
+            out.println("Type de retour : " + method.getReturnType().getCanonicalName());
+            out.println("Modelview : " + ModelView.class.getCanonicalName());
+
+            RequestDispatcher dispatcher = req.getRequestDispatcher(modelview.getView());
+            dispatcher.forward(req, resp);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        /*
-         * String url = request.getServletPath();
-         * String requete = request.getQueryString();
-         * if (requete != null) {
-         * url = url + "?" + requete;
-         * }
-         * request.setAttribute("url", url);
-         * RequestDispatcher dispat = request.getRequestDispatcher("url.jsp");
-         * dispat.forward(request, response);
-         */
+        out.println("URI : " + req.getRequestURI());
+        out.println("Query : " + req.getQueryString());
+        out.println("URL : " + req.getRequestURL());
+        out.println("Pattern : " + mapping.getPattern());
+        out.println("Match value : " + mapping.getMatchValue());
+        out.println("Get URL : " + getURL(req));
+
+        for (String k : this.getMappingURLS().keySet()) {
+        out.println("\nClass name : " +
+        this.getMappingURLS().get(k).getClassName());
+        out.println("Mathod : " + this.getMappingURLS().get(k).getMethod());
+        out.println("Annotation value : " + k);
+        }
     }
 
     @Override
