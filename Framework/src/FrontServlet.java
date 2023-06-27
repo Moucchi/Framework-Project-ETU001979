@@ -126,6 +126,7 @@ public class FrontServlet extends HttpServlet {
             Class<?> process_class = Class.forName(map.getClassName());
             Object objet = process_class.newInstance();
             Method method = objet.getClass().getDeclaredMethod(map.getMethod());
+            HashMap<String, Object> fetchedData = new HashMap<>();
 
             out.println("k : " + k);
             out.println("Class name : " + map.getClassName());
@@ -133,6 +134,11 @@ public class FrontServlet extends HttpServlet {
 
             if (method.getReturnType().equals(ModelView.class)) {
                 modelview = (ModelView) method.invoke(objet);
+                fetchedData = modelview.getData();
+
+                for (String key : fetchedData.keySet()) {
+                }
+
             }
 
             out.println("Type de retour : " + method.getReturnType().getCanonicalName());
@@ -153,10 +159,10 @@ public class FrontServlet extends HttpServlet {
         out.println("Get URL : " + getURL(req));
 
         for (String key : this.getMappingURLS().keySet()) {
-        out.println("\nClass name : " +
-        this.getMappingURLS().get(key).getClassName());
-        out.println("Mathod : " + this.getMappingURLS().get(key).getMethod());
-        out.println("Annotation value : " + key);
+            out.println("\nClass name : " +
+                    this.getMappingURLS().get(key).getClassName());
+            out.println("Mathod : " + this.getMappingURLS().get(key).getMethod());
+            out.println("Annotation value : " + key);
         }
     }
 
