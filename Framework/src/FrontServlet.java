@@ -126,38 +126,49 @@ public class FrontServlet extends HttpServlet {
             Class<?> process_class = Class.forName(map.getClassName());
             Object objet = process_class.newInstance();
             Method method = objet.getClass().getDeclaredMethod(map.getMethod());
+            HashMap<String, Object> fetchedData = new HashMap<>();
 
             out.println("k : " + k);
             out.println("Class name : " + map.getClassName());
             out.println("Method : " + map.getMethod());
+            out.println("Phrase : Noooooooooooooooooooooo " );
 
             if (method.getReturnType().equals(ModelView.class)) {
                 modelview = (ModelView) method.invoke(objet);
+
+                modelview.addItem("nom", "Oksama");
+                modelview.addItem("prenom", "Yami");
+
+                fetchedData = modelview.getData();
+
+                for (String key : fetchedData.keySet()) {
+                    req.setAttribute(key, fetchedData.get(key));
+                }
+
+                RequestDispatcher dispatcher = req.getRequestDispatcher(modelview.getView());
+                dispatcher.forward(req, resp);
             }
 
             out.println("Type de retour : " + method.getReturnType().getCanonicalName());
             out.println("Modelview : " + ModelView.class.getCanonicalName());
 
-            RequestDispatcher dispatcher = req.getRequestDispatcher(modelview.getView());
-            dispatcher.forward(req, resp);
-
         } catch (Exception e) {
-            e.printStackTrace();
+            out.println(e);
         }
 
-        out.println("URI : " + req.getRequestURI());
-        out.println("Query : " + req.getQueryString());
-        out.println("URL : " + req.getRequestURL());
-        out.println("Pattern : " + mapping.getPattern());
-        out.println("Match value : " + mapping.getMatchValue());
-        out.println("Get URL : " + getURL(req));
+        // out.println("URI : " + req.getRequestURI());
+        // out.println("Query : " + req.getQueryString());
+        // out.println("URL : " + req.getRequestURL());
+        // out.println("Pattern : " + mapping.getPattern());
+        // out.println("Match value : " + mapping.getMatchValue());
+        // out.println("Get URL : " + getURL(req));
 
-        for (String key : this.getMappingURLS().keySet()) {
-        out.println("\nClass name : " +
-        this.getMappingURLS().get(key).getClassName());
-        out.println("Mathod : " + this.getMappingURLS().get(key).getMethod());
-        out.println("Annotation value : " + key);
-        }
+        // for (String key : this.getMappingURLS().keySet()) {
+        // out.println("\nClass name : " +
+        // this.getMappingURLS().get(key).getClassName());
+        // out.println("Mathod : " + this.getMappingURLS().get(key).getMethod());
+        // out.println("Annotation value : " + key);
+        // }
     }
 
     @Override
