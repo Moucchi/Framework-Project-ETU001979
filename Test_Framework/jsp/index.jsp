@@ -5,6 +5,10 @@
 	<title> Framework_Index </title>
 </head>
 <body>
-	<a href="Emp-great">Cliquer</a>
+	<form action="Hello">
+		<p><input type="text" name="nom" id="" placeholder="Nom ..."></p>
+		<p><input type="number" name="age" id="" placeholder="Age ..."></p>
+		<input type="submit" value="Okay">
+	</form>
 </body>
 </html>

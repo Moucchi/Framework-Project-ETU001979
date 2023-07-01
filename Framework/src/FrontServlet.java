@@ -3,11 +3,15 @@ package etu1979.framework.servlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import etu1979.framework.util.Inc;
 import etu1979.framework.Mapping;
 import etu1979.framework.Annotation.URL;
 import etu1979.framework.ModelView;
@@ -26,118 +30,45 @@ public class FrontServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        HashMap<String, Mapping> toBeUsed = map();
+        HashMap<String, Mapping> toBeUsed = Inc.map(this);
 
         this.setMappingURLS(toBeUsed);
     }
 
-    public HashMap<String, Mapping> map() {
-        HashMap<String, Mapping> result = new HashMap<>();
-
-        String fullPath = getPath();
-
-        ArrayList<String> classNames = getAllClassNames(fullPath);
-
-        for (String classs : classNames) {
-            try {
-                Class temp = Class.forName(classs);
-
-                for (Method method : temp.getDeclaredMethods()) {
-                    Mapping mapping = new Mapping();
-                    URL annotation = method.getAnnotation(URL.class);
-
-                    if (annotation != null) {
-                        mapping.setClassName(temp.getCanonicalName());
-                        mapping.setMethod(method.getName());
-
-                        result.put(annotation.value(), mapping);
-                    }
-                }
-
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return result;
-    }
-
-    public ArrayList<String> getAllClassNames(String path) {
-        ArrayList<String> result = new ArrayList<>();
-        result.add(path);
-        File directory = new File(path);
-        File[] files = directory.listFiles();
-
-        if (files != null) {
-            for (File file : files) {
-                if (!file.isDirectory()) {
-                    String fileName = file.getName();
-
-                    if (fileName.contains(".class")) {
-                        String toBeAdded = file.getPath();
-                        toBeAdded = toBeAdded.replace(".class", "");
-                        toBeAdded = toBeAdded.replace("\\", ".");
-
-                        String temp = getPath();
-                        temp = temp.replace("\\", ".");
-
-                        toBeAdded = toBeAdded.replace(temp, "");
-                        result.add(toBeAdded);
-                    }
-
-                } else {
-                    String subPath = file.getPath();
-                    result.addAll(getAllClassNames(subPath));
-                }
-            }
-
-        }
-
-        return result;
-    }
-
-    public String getPath() {
-        String relativePath = "\\WEB-INF\\classes\\";
-        String contextPath = getServletContext().getContextPath();
-
-        contextPath = contextPath.substring(1);
-
-        String fullPath = "webapps\\" + contextPath + relativePath;
-
-        return fullPath;
-    }
-
-    public String getURL(HttpServletRequest request) {
-        String value = new String();
-        String URI = request.getRequestURI();
-        String context_path = request.getContextPath();
-        value = URI.substring(context_path.length() + 1);
-        return value;
-    }
-
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        HttpServletMapping mapping = req.getHttpServletMapping();
         PrintWriter out = resp.getWriter();
-        String k = getURL(req);
+        String k = Inc.getURL(req);
         Mapping map = getMappingURLS().get(k);
         ModelView modelview = null;
 
         try {
-            Class<?> process_class = Class.forName(map.getClassName());
-            Object objet = process_class.newInstance();
+            Class process_class = Class.forName(map.getClassName());
+            Object objet = process_class.getConstructor().newInstance();
             Method method = objet.getClass().getDeclaredMethod(map.getMethod());
             HashMap<String, Object> fetchedData = new HashMap<>();
+            Enumeration<String> parameterNames = req.getParameterNames();
+            ArrayList<String> inputFiedlsdNames = new ArrayList<>();
 
-            out.println("k : " + k);
-            out.println("Class name : " + map.getClassName());
-            out.println("Method : " + map.getMethod());
-            out.println("Phrase : Noooooooooooooooooooooo " );
+            while (parameterNames.hasMoreElements()) {
+                String fieldName = parameterNames.nextElement();
+                inputFiedlsdNames.add(fieldName);
+            }
 
             if (method.getReturnType().equals(ModelView.class)) {
+                for (String inputName : inputFiedlsdNames) {
+                    Method setter = Inc.getSetter(process_class, inputName);
+                    out.println("GetSetter result : " + setter.getName());
+                    setter.invoke(objet,  req.getParameter(inputName));
+                }
+
+                req.setAttribute(process_class.getName(), objet);
+
                 modelview = (ModelView) method.invoke(objet);
 
-                modelview.addItem("nom", "Oksama");
-                modelview.addItem("prenom", "Yami");
+                for (String name : inputFiedlsdNames) {
+                    modelview.addItem(name, req.getParameter(name));
+                    out.println("Name : " + name + "\tValue : " + req.getParameter(name) + "\n");
+                }
 
                 fetchedData = modelview.getData();
 
@@ -149,26 +80,9 @@ public class FrontServlet extends HttpServlet {
                 dispatcher.forward(req, resp);
             }
 
-            out.println("Type de retour : " + method.getReturnType().getCanonicalName());
-            out.println("Modelview : " + ModelView.class.getCanonicalName());
-
         } catch (Exception e) {
             out.println(e);
         }
-
-        // out.println("URI : " + req.getRequestURI());
-        // out.println("Query : " + req.getQueryString());
-        // out.println("URL : " + req.getRequestURL());
-        // out.println("Pattern : " + mapping.getPattern());
-        // out.println("Match value : " + mapping.getMatchValue());
-        // out.println("Get URL : " + getURL(req));
-
-        // for (String key : this.getMappingURLS().keySet()) {
-        // out.println("\nClass name : " +
-        // this.getMappingURLS().get(key).getClassName());
-        // out.println("Mathod : " + this.getMappingURLS().get(key).getMethod());
-        // out.println("Annotation value : " + key);
-        // }
     }
 
     @Override
