@@ -1,11 +1,16 @@
 package etu1979.framework.model;
 
 import etu1979.framework.Annotation.URL;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
 import etu1979.framework.ModelView;
 
 public class Emp {
-    String nom ;
+    String nom;
     int age;
+    int huhu;
 
     public Emp() {
     }
@@ -15,9 +20,22 @@ public class Emp {
         return new ModelView("Greating.jsp");
     }
 
-    @URL(value = "Test")
-    public ModelView test() {
-        return new ModelView("Wassup");
+    @URL(value = "Test", parameters = { "annee", "mois", "jour" })
+    public ModelView calclAge(String annee, String mois, String jour) {
+        ModelView result = new ModelView("Age.jsp");
+
+        int anneeDeNaissance = Integer.valueOf(annee);
+        int moisDeNaissance = Integer.valueOf(mois);
+        int jourDeNaissance = Integer.valueOf(jour);
+
+        LocalDate dateDeNaissance = LocalDate.of(anneeDeNaissance, moisDeNaissance, jourDeNaissance);
+        LocalDate actual = LocalDate.of(2023, 07, 01);
+
+
+        long yearsDiff = ChronoUnit.YEARS.between(dateDeNaissance, actual);
+        result.addItem("difference", String.valueOf(yearsDiff));
+
+        return result;
     }
 
     public String getNom() {
