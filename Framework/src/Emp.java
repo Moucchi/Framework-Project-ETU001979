@@ -4,7 +4,7 @@ import etu1979.framework.Annotation.URL;
 import etu1979.framework.ModelView;
 
 public class Emp {
-    @URL(value = "Hello")
+    @URL(value = "Hello" , parameters = {"bla"})
     public String great() {
         return "Wassup";
     }

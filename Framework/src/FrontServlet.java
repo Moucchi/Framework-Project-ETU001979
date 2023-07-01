@@ -46,34 +46,31 @@ public class FrontServlet extends HttpServlet {
             Object objet = process_class.getConstructor().newInstance();
             Method method = objet.getClass().getDeclaredMethod(map.getMethod());
             HashMap<String, Object> fetchedData = new HashMap<>();
-            Enumeration<String> parameterNames = req.getParameterNames();
-            ArrayList<String> inputFiedlsdNames = new ArrayList<>();
-
-            while (parameterNames.hasMoreElements()) {
-                String fieldName = parameterNames.nextElement();
-                inputFiedlsdNames.add(fieldName);
-            }
+            ArrayList<String> inputFiedlsdNames = Inc.getInputFiedlsdNames(req);
 
             if (method.getReturnType().equals(ModelView.class)) {
                 for (String inputName : inputFiedlsdNames) {
-                    Method setter = Inc.getSetter(process_class, inputName);
-                    out.println("GetSetter result : " + setter.getName());
-                    setter.invoke(objet,  req.getParameter(inputName));
+                    if (Inc.isIn( process_class , inputName )) {
+                        Method setter = Inc.getSetter(process_class, inputName);
+                        out.println("GetSetter result : " + setter.getName());
+                        setter.invoke(objet, req.getParameter(inputName));
+                        out.println("Hereeeeeeeeeeeeeee");
+                    }
                 }
 
                 req.setAttribute(process_class.getName(), objet);
 
-                modelview = (ModelView) method.invoke(objet);
+                modelview = Inc.call(req , method , objet);
 
                 for (String name : inputFiedlsdNames) {
-                    modelview.addItem(name, req.getParameter(name));
-                    out.println("Name : " + name + "\tValue : " + req.getParameter(name) + "\n");
+                modelview.addItem(name, req.getParameter(name));
+                out.println("Name : " + name + "\tValue : " + req.getParameter(name) + "\n");
                 }
 
                 fetchedData = modelview.getData();
 
                 for (String key : fetchedData.keySet()) {
-                    req.setAttribute(key, fetchedData.get(key));
+                req.setAttribute(key, fetchedData.get(key));
                 }
 
                 RequestDispatcher dispatcher = req.getRequestDispatcher(modelview.getView());
