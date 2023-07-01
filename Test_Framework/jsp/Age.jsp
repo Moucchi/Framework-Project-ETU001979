@@ -10,17 +10,15 @@
 <body>
     <%@ page import="etu1979.framework.model.Emp" %>
     <%
-        String nom=(String)request.getAttribute("nom") ;
-        String prenom=(String)request.getAttribute("age") ;
         Emp object = (Emp)request.getAttribute("etu1979.framework.model.Emp");
-        String age = (String)request.getAttribute("difference");
+        String difference = (String)request.getAttribute("difference");
     %>
 
     <p>
         <h4>Wassuuuuup <%= object.getNom() %> <%= object.getAge() %> age Hehe</h4>
     </p>
     <p>
-        <h4>Difference  <%= age %> ans</h4>
+        <h4>Difference  <%= difference %> ans</h4>
     </p>
 </body>
 

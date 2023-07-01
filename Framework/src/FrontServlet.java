@@ -10,6 +10,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import etu1979.framework.util.Inc;
 import etu1979.framework.Mapping;
@@ -41,36 +42,48 @@ public class FrontServlet extends HttpServlet {
         Mapping map = getMappingURLS().get(k);
         ModelView modelview = null;
 
+        for (Entry<String, Mapping> entry : getMappingURLS().entrySet()) {
+            out.println("Key of entry " + entry.getKey());
+            out.println("ClassName : " + entry.getValue().getClassName());
+            out.println("MethodName : " + entry.getValue().getMethod() + "\n");
+        }
+        
+        out.println("Key : " + k);
+        out.println("Class name : " + map.getClassName());
+
         try {
             Class process_class = Class.forName(map.getClassName());
             Object objet = process_class.getConstructor().newInstance();
-            Method method = objet.getClass().getDeclaredMethod(map.getMethod());
+            Method method = Inc.getMethode(process_class, map.getMethod(), k);
             HashMap<String, Object> fetchedData = new HashMap<>();
             ArrayList<String> inputFiedlsdNames = Inc.getInputFiedlsdNames(req);
 
+            out.println("Method's details : " + method);
+            out.println("Return type : " + method.getReturnType().getSimpleName() + "\n");
+
             if (method.getReturnType().equals(ModelView.class)) {
                 for (String inputName : inputFiedlsdNames) {
-                    if (Inc.isIn( process_class , inputName )) {
+                    if (Inc.isIn(process_class, inputName)) {
                         Method setter = Inc.getSetter(process_class, inputName);
-                        out.println("GetSetter result : " + setter.getName());
+                        out.println("setter method's details " + setter);
                         setter.invoke(objet, req.getParameter(inputName));
-                        out.println("Hereeeeeeeeeeeeeee");
                     }
                 }
 
                 req.setAttribute(process_class.getName(), objet);
 
-                modelview = Inc.call(req , method , objet);
+                modelview = (ModelView) method.invoke(objet, Inc.getNecessaryParametersValue(req, method).toArray());
+                out.println("View : " + modelview.getView());
 
                 for (String name : inputFiedlsdNames) {
-                modelview.addItem(name, req.getParameter(name));
-                out.println("Name : " + name + "\tValue : " + req.getParameter(name) + "\n");
+                    modelview.addItem(name, req.getParameter(name));
                 }
 
                 fetchedData = modelview.getData();
 
                 for (String key : fetchedData.keySet()) {
-                req.setAttribute(key, fetchedData.get(key));
+                    req.setAttribute(key, fetchedData.get(key));
+                    out.println(key + "," + fetchedData.get(key));
                 }
 
                 RequestDispatcher dispatcher = req.getRequestDispatcher(modelview.getView());

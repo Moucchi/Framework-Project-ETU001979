@@ -10,6 +10,7 @@ import etu1979.framework.ModelView;
 public class Emp {
     String nom;
     int age;
+    int huhu;
 
     public Emp() {
     }
@@ -19,13 +20,8 @@ public class Emp {
         return new ModelView("Greating.jsp");
     }
 
-    @URL(value = "Test")
-    public ModelView test() {
-        return new ModelView("Wassup");
-    }
-
     @URL(value = "Test", parameters = { "annee", "mois", "jour" })
-    public ModelView CalclAge(String annee, String mois, String jour) {
+    public ModelView calclAge(String annee, String mois, String jour) {
         ModelView result = new ModelView("Age.jsp");
 
         int anneeDeNaissance = Integer.valueOf(annee);
@@ -37,7 +33,7 @@ public class Emp {
 
 
         long yearsDiff = ChronoUnit.YEARS.between(dateDeNaissance, actual);
-        result.addItem("difference", yearsDiff);
+        result.addItem("difference", String.valueOf(yearsDiff));
 
         return result;
     }

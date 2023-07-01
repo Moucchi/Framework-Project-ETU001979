@@ -1,6 +1,8 @@
 package etu1979.framework.util;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,6 +16,7 @@ import etu1979.framework.ModelView;
 
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class Inc {
     public static HashMap<String, Mapping> map(HttpServlet servlet) {
@@ -157,6 +160,39 @@ public class Inc {
         return inputFiedlsdNames;
     }
 
+    public static ArrayList<String> toArrayList(String[] allParameters) {
+        ArrayList<String> result = new ArrayList<>();
+
+        for (String parameter : allParameters) {
+            result.add(parameter);
+        }
+
+        return result;
+    }
+
+    public static Method getMethode(Class modelClass, String methodName, String annotationName) {
+        Method[] methods = modelClass.getDeclaredMethods();
+
+        try {
+            for (Method method : methods) {
+                if (method.getName().equalsIgnoreCase(methodName)) {
+                    if (method.isAnnotationPresent(URL.class)) {
+                        URL annotation = method.getAnnotation(URL.class);
+                        int parameterCount = annotation.parameters().length;
+
+                        if (method.getParameterCount() == parameterCount) {
+                            return method;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
+        return null;
+    }
+
     public static boolean checkParameters(HttpServletRequest req, Method method) {
         String[] necessaryParameters = method.getAnnotation(URL.class).parameters();
 
@@ -168,33 +204,31 @@ public class Inc {
             }
 
             return true;
-        } else {
-            return true;
         }
+
+        return true;
     }
 
     public static ArrayList<String> getNecessaryParametersValue(HttpServletRequest req, Method method) {
         ArrayList<String> result = new ArrayList<>();
+        String[] necessaryParameters = method.getAnnotation(URL.class).parameters();
 
         if (checkParameters(req, method)) {
-            for (String inputFieldName : getInputFiedlsdNames(req)) {
-                result.add(req.getParameter(inputFieldName));
+            for (String necessaryParameter : necessaryParameters) {
+                result.add(req.getParameter(necessaryParameter));
             }
         }
 
         return result;
     }
 
-    public static ModelView call(HttpServletRequest req, Method method , Object caller){
-        ModelView result = new ModelView();
+    public static ModelView call(HttpServletRequest req, Method method, Object caller) {
+        ModelView result = new ModelView("Error.jsp");
+
         try {
             ArrayList<String> parameters = getNecessaryParametersValue(req, method);
-            if( parameters.size() > 0 ){
-                result = (ModelView) method.invoke(caller , parameters.toArray() );
-            }else{
-                result = (ModelView) method.invoke(caller);
-            }
-
+            result = (ModelView) method.invoke(caller, parameters.toArray());
+            return result;
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
@@ -206,13 +240,13 @@ public class Inc {
         return result;
     }
 
-    public static boolean isIn(Class modelClass , String inputName){
+    public static boolean isIn(Class modelClass, String inputName) {
         Field[] fields = modelClass.getDeclaredFields();
-        
+
         for (Field field : fields) {
             String fieldName = field.getName();
 
-            if( fieldName.equalsIgnoreCase(inputName) ){
+            if (fieldName.equalsIgnoreCase(inputName)) {
                 return true;
             }
         }
