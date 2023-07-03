@@ -13,6 +13,7 @@
 		<p><input type="text" name="annee" id="" placeholder="Annee de naissance ..."></p>
 		<p><input type="text" name="mois" id="" placeholder="Mois de naissance ..."></p>
 		<p><input type="text" name="jour" id="" placeholder="Jour de naissance ..."></p>
+		<p><input type="file" name="profilPic"></p>
 		<input type="submit" value="Okay">
 	</form>
 </body>
