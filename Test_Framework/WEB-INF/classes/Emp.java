@@ -71,16 +71,16 @@ public class Emp {
         this.nom = nom;
     }
 
-    public int getAge() {
-        return age;
-    }
+    // public int getAge() {
+    //     return age;
+    // }
 
-    public void setAge(int age) {
-        this.age = age;
-    }
+    // public void setAge(int age) {
+    //     this.age = age;
+    // }
 
-    public void setAge(String age) {
-        int toBeUsed = Integer.valueOf(age);
-        this.age = toBeUsed;
-    }
+    // public void setAge(String age) {
+    //     int toBeUsed = Integer.valueOf(age);
+    //     this.age = toBeUsed;
+    // }
 }
