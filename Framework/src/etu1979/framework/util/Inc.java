@@ -11,11 +11,13 @@ import java.util.HashMap;
 import etu1979.framework.FileUpload;
 import etu1979.framework.Mapping;
 import etu1979.framework.Annotation.URL;
+import etu1979.framework.Annotation.Authentification;
 import etu1979.framework.Annotation.Scope;
 import etu1979.framework.ModelView;
 
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 public class Inc {
     public static HashMap<String, Mapping> map(HttpServlet servlet) {
@@ -181,13 +183,6 @@ public class Inc {
         return false;
     }
 
-    public static String capitalize(String toBeCapitalized) {
-        String result = toBeCapitalized.toUpperCase().charAt(0)
-                + toBeCapitalized.substring(1, toBeCapitalized.length());
-
-        return result;
-    }
-
     public static ArrayList<String> getInputFiedlsdNames(HttpServletRequest req) {
         Enumeration<String> parameterNames = req.getParameterNames();
         ArrayList<String> inputFiedlsdNames = new ArrayList<>();
@@ -291,5 +286,24 @@ public class Inc {
         }
 
         return false;
+    }
+
+    public static boolean checkMethod(Method method , HttpServletRequest request , String sessionName , String profilName){
+        Authentification authentification = method.getAnnotation(Authentification.class);
+        String value = "";
+        
+        if( !method.isAnnotationPresent(Authentification.class) ){
+            return false;
+        }else if( request.getSession().getAttribute(sessionName) == null ){
+            return false;
+        }else if( request.getSession().getAttribute(profilName) != null  ){
+            value = request.getSession().getAttribute(profilName).toString();
+        }
+
+        if(!authentification.admin().equals(value)){
+            return false;
+        }
+        
+        return true;
     }
 }

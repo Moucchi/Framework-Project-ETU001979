@@ -9,8 +9,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import etu1979.framework.util.Inc;
 import etu1979.framework.Mapping;
@@ -18,17 +18,21 @@ import etu1979.framework.ModelView;
 import etu1979.framework.FileUpload;
 
 import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
 @MultipartConfig
 public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> mappingURLS;
     HashMap<Class, Object> singleton;
+    String sessionName, profil;
 
     @Override
     public void init() throws ServletException {
@@ -36,8 +40,30 @@ public class FrontServlet extends HttpServlet {
         HashMap<String, Mapping> toBeUsed = Inc.map(this);
         HashMap<Class, Object> toBeUsedSingleton = Inc.getSingleton(this);
 
+        ServletConfig config = getServletConfig();
+
+        setSessionName(config.getInitParameter("sessionName"));
+        setProfil(config.getInitParameter("profilName"));
+
         this.setMappingURLS(toBeUsed);
         this.setSingleton(toBeUsedSingleton);
+    }
+
+    public HashMap<String, HttpSession> getAllSession() {
+        HashMap<String, HttpSession> result = new HashMap<>();
+
+        ServletContext servletContext = getServletContext();
+
+        Enumeration<String> sessionIds = servletContext.getAttributeNames();
+        
+        while (sessionIds.hasMoreElements()) {
+            String sessionId = sessionIds.nextElement();            
+            HttpSession session = (HttpSession) servletContext.getAttribute(sessionId);
+            
+            result.put(sessionId , session);
+        }
+
+        return result;
     }
 
     private boolean isSIngleton(Class modeClass) {
@@ -97,6 +123,12 @@ public class FrontServlet extends HttpServlet {
                 for (String key : fetchedData.keySet()) {
                     req.setAttribute(key, fetchedData.get(key));
                     out.println(key + "," + fetchedData.get(key));
+                }
+
+                if( modelview.checkSession() ){
+                    for (String key : modelview.getSession().keySet()) {
+                        req.getSession().setAttribute(key, modelview.getSession().get(key));
+                    }
                 }
 
                 try {
@@ -234,5 +266,21 @@ public class FrontServlet extends HttpServlet {
 
     public void setSingleton(HashMap<Class, Object> singleton) {
         this.singleton = singleton;
+    }
+
+    public String getSessionName() {
+        return sessionName;
+    }
+
+    public void setSessionName(String sessionName) {
+        this.sessionName = sessionName;
+    }
+
+    public String getProfil() {
+        return profil;
+    }
+
+    public void setProfil(String profil) {
+        this.profil = profil;
     }
 }
