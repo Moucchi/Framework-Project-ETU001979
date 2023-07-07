@@ -1,8 +1,6 @@
 package etu1979.framework.util;
 
 import java.io.File;
-import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,11 +11,11 @@ import java.util.HashMap;
 import etu1979.framework.FileUpload;
 import etu1979.framework.Mapping;
 import etu1979.framework.Annotation.URL;
+import etu1979.framework.Annotation.Scope;
 import etu1979.framework.ModelView;
 
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 public class Inc {
     public static HashMap<String, Mapping> map(HttpServlet servlet) {
@@ -42,6 +40,52 @@ public class Inc {
                 }
 
             } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return result;
+    }
+
+    public static HashMap<Class, Object> getSingleton(HttpServlet servlet) {
+        HashMap<Class, Object> result = new HashMap<>();
+        String fullPath = getPath(servlet);
+        ArrayList<String> classNames = getAllClassNames(fullPath, servlet);
+
+        for (String classs : classNames) {
+            try {
+                Class temp = Class.forName(classs);
+                Class annotationClass = Scope.class;
+
+                if (temp.isAnnotationPresent(annotationClass)) {
+                    String scopeValue = (String) ((Scope) temp.getAnnotation(annotationClass)).value();
+                    
+                    if (scopeValue.equalsIgnoreCase("singleton")) {
+                        Object tempInstance = temp.getDeclaredConstructor().newInstance();
+                        result.put(temp, tempInstance);
+                    }
+
+                }
+
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (SecurityException e) {
+                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

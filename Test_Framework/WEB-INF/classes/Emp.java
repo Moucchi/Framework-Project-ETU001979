@@ -1,5 +1,6 @@
 package etu1979.framework.model;
 
+import etu1979.framework.Annotation.Scope;
 import etu1979.framework.Annotation.URL;
 
 import java.time.LocalDate;
@@ -8,6 +9,7 @@ import java.time.temporal.ChronoUnit;
 import etu1979.framework.ModelView;
 import etu1979.framework.FileUpload;
 
+@Scope( value = "singleton" )
 public class Emp {
     String nom;
     FileUpload profilPic;
