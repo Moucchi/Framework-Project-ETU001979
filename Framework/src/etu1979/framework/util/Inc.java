@@ -288,16 +288,16 @@ public class Inc {
         return false;
     }
 
-    public static boolean checkMethod(Method method , HttpServletRequest request , String sessionName , String profilName){
+    public static boolean checkMethod(Method method , HashMap<String, HttpSession> sessionList , String sessionName , String profilName){
         Authentification authentification = method.getAnnotation(Authentification.class);
         String value = "";
         
         if( !method.isAnnotationPresent(Authentification.class) ){
             return false;
-        }else if( request.getSession().getAttribute(sessionName) == null ){
+        }else if( !sessionList.containsKey(sessionName) ){
             return false;
-        }else if( request.getSession().getAttribute(profilName) != null  ){
-            value = request.getSession().getAttribute(profilName).toString();
+        }else if( sessionList.containsKey(profilName)  ){
+            value = sessionList.get(profilName).toString();
         }
 
         if(!authentification.admin().equals(value)){
