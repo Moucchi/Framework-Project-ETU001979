@@ -7,9 +7,9 @@
 </head>
 
 <body>
-	<form action="TestUpload">
+	<form action="TestUpload" enctype="multipart/form-data" method="post">
 		<p><input type="text" name="nom" id="" placeholder="Nom ..."></p>
-		<p><input type="file" name="profilPic"></p>
+		<p><input type="file" name="profilPic" ></p>
 		<input type="submit" value="Okay">
 	</form>
 </body>

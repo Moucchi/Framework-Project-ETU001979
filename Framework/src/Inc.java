@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 
+import etu1979.framework.FileUpload;
 import etu1979.framework.Mapping;
 import etu1979.framework.Annotation.URL;
 import etu1979.framework.ModelView;
@@ -114,10 +115,8 @@ public class Inc {
 
         Method[] methods = modelClass.getDeclaredMethods();
         for (Method method : methods) {
-            if (method.getName().equalsIgnoreCase(methodName)) {
-                if (doesMatch(method.getParameterTypes())) {
-                    return method;
-                }
+            if (method.getName().equalsIgnoreCase(methodName) && method.getReturnType() != FileUpload.class) {
+                return method;
             }
         }
 
@@ -143,10 +142,6 @@ public class Inc {
                 + toBeCapitalized.substring(1, toBeCapitalized.length());
 
         return result;
-    }
-
-    public static void set(Class modelClass, String attributeName, String value) {
-        Method toBeInvokedMethod = getSetter(modelClass, attributeName);
     }
 
     public static ArrayList<String> getInputFiedlsdNames(HttpServletRequest req) {

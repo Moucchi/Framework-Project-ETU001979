@@ -70,13 +70,13 @@ public class FrontServlet extends HttpServlet {
 
             if (method.getReturnType().equals(ModelView.class)) {
                 for (String inputName : inputFiedlsdNames) {
+
                     Field temp = process_class.getDeclaredField(inputName);
-                    if (temp.getType() != FileUpload.class) {
-                        if (Inc.isIn(process_class, inputName)) {
-                            Method setter = Inc.getSetter(process_class, inputName);
-                            out.println("setter method's details " + setter);
-                            setter.invoke(objet, req.getParameter(inputName));
-                        }
+
+                    if (Inc.isIn(process_class, inputName)) {
+                        Method setter = Inc.getSetter(process_class, inputName);
+                        setter.invoke(objet, req.getParameter(inputName));
+                        out.println("Setter : " + setter);
                     }
                 }
 
@@ -101,9 +101,13 @@ public class FrontServlet extends HttpServlet {
                     if (parts.size() > 0) {
                         for (Field field : process_class.getDeclaredFields()) {
                             if (field.getType() == FileUpload.class) {
-                                Method function = objet.getClass().getDeclaredMethod("setProfilPic", field.getType());
-                                Object value = fileTraitement(parts, field);
-                                function.invoke(objet, value);
+                                Method setter = Inc.getSetter(process_class, field.getName());
+                                FileUpload value = fileTraitement(parts, field);
+
+                                out.println("Filename : " + value.getFileName());
+                                out.println("FilePath : " + value.getPath());
+
+                                setter.invoke(objet, value);
                             }
                         }
                     }
@@ -111,8 +115,8 @@ public class FrontServlet extends HttpServlet {
                     out.println(e);
                 }
 
-                RequestDispatcher dispatcher = req.getRequestDispatcher(modelview.getView());
-                dispatcher.forward(req, resp);
+                // RequestDispatcher dispatcher = req.getRequestDispatcher(modelview.getView());
+                // dispatcher.forward(req, resp);
             }
 
         } catch (Exception e) {
@@ -120,45 +124,85 @@ public class FrontServlet extends HttpServlet {
         }
     }
 
+    private String getFileInputName(Part part) {
+        String contentDisposition = part.getHeader("content-disposition");
+        String name = "";
+
+        if (contentDisposition != null && contentDisposition.startsWith("form-data")) {
+            String[] elements = contentDisposition.split(";");
+
+            for (String element : elements) {
+                if (element.trim().startsWith("name")) {
+                    String[] nameParts = element.split("=");
+                    name = nameParts[1].trim().replaceAll("\"", "");
+                    return name;
+                }
+            }
+        }
+
+        return name;
+    }
+
     protected FileUpload fileTraitement(Collection<Part> files, Field field) {
         FileUpload file = new FileUpload();
         String name = field.getName();
-        boolean exists = false;
-        Part filepart = null;
+        boolean found = false;
+        Part toBeUsed = null;
+
         for (Part part : files) {
             String contentDisposition = part.getHeader("content-disposition");
             System.out.println(contentDisposition);
-            if (part.getName().equals(name)) {
-                filepart = part;
-                exists = true;
+
+            if (part.getName().equalsIgnoreCase(name)) {
+                toBeUsed = part;
+                found = true;
                 break;
             }
         }
-        try (InputStream io = filepart.getInputStream()) {
-            ByteArrayOutputStream buffers = new ByteArrayOutputStream();
-            byte[] buffer = new byte[(int) filepart.getSize()];
-            int read;
-            while ((read = io.read(buffer, 0, buffer.length)) != -1) {
-                buffers.write(buffer, 0, read);
+
+        if (found) {
+            try (InputStream io = toBeUsed.getInputStream()) {
+                ByteArrayOutputStream buffers = new ByteArrayOutputStream();
+                byte[] buffer = new byte[(int) toBeUsed.getSize()];
+                int read;
+                String destinationPath = getServletContext().getRealPath("\\Uploads");
+                File destination = new File(destinationPath);
+
+                if (!destination.exists()) {
+                    destination.mkdirs();
+                }
+
+                while ((read = io.read(buffer, 0, buffer.length)) != -1) {
+                    buffers.write(buffer, 0, read);
+                }
+
+                toBeUsed.write(destinationPath + "\\" + this.getFileName(toBeUsed));
+
+                file.setFileName(this.getFileName(toBeUsed));
+                file.setPath(destinationPath + "\\" + this.getFileName(toBeUsed));
+                file.setBytes(buffers.toByteArray());
+
+                return file;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
             }
-            file.setFileName(this.fileName(filepart));
-            file.setBytes(buffers.toByteArray());
-            return file;
-        } catch (Exception e) {
-            e.printStackTrace();
+        }else{
             return null;
         }
     }
 
-    private String fileName(Part part) {
+    private String getFileName(Part part) {
         String contentDisposition = part.getHeader("content-disposition");
-        System.out.println(contentDisposition);
-        String[] parts = contentDisposition.split(";");
-        for (String partStr : parts) {
-            if (partStr.trim().startsWith("filename"))
-                return partStr.substring(partStr.indexOf('=') + 1).trim().replace("\"", "");
+        String[] elements = contentDisposition.split(";");
+
+        for (String element : elements) {
+            if (element.trim().startsWith("filename")) {
+                return element.substring(element.indexOf('=') + 1).trim().replace("\"", "");
+            }
         }
-        return null;
+
+        return "";
     }
 
     @Override
