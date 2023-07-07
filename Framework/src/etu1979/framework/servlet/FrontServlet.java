@@ -34,6 +34,7 @@ import jakarta.servlet.ServletConfig;
 @MultipartConfig
 public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> mappingURLS;
+    HashMap<Class , Object> singleton;
 
     @Override
     public void init() throws ServletException {
