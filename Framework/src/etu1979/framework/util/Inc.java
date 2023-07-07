@@ -58,8 +58,8 @@ public class Inc {
                 Class annotationClass = Scope.class;
 
                 if (temp.isAnnotationPresent(annotationClass)) {
-
                     String scopeValue = (String) ((Scope) temp.getAnnotation(annotationClass)).value();
+                    
                     if (scopeValue.equalsIgnoreCase("singleton")) {
                         Object tempInstance = temp.getDeclaredConstructor().newInstance();
                         result.put(temp, tempInstance);

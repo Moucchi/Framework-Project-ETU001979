@@ -9,15 +9,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import etu1979.framework.util.Inc;
 import etu1979.framework.Mapping;
-import etu1979.framework.Annotation.URL;
 import etu1979.framework.ModelView;
 import etu1979.framework.FileUpload;
 
@@ -25,23 +21,31 @@ import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletMapping;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
-import jakarta.servlet.ServletConfig;
 
 @MultipartConfig
 public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> mappingURLS;
-    HashMap<Class , Object> singleton;
+    HashMap<Class, Object> singleton;
 
     @Override
     public void init() throws ServletException {
         super.init();
         HashMap<String, Mapping> toBeUsed = Inc.map(this);
+        HashMap<Class, Object> toBeUsedSingleton = Inc.getSingleton(this);
 
         this.setMappingURLS(toBeUsed);
+        this.setSingleton(toBeUsedSingleton);
+    }
+
+    private boolean isSIngleton(Class modeClass) {
+        if (singleton.containsKey(modeClass)) {
+            return true;
+        }
+
+        return false;
     }
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -50,18 +54,16 @@ public class FrontServlet extends HttpServlet {
         Mapping map = getMappingURLS().get(k);
         ModelView modelview = null;
 
-        for (Entry<String, Mapping> entry : getMappingURLS().entrySet()) {
-            out.println("Key of entry " + entry.getKey());
-            out.println("ClassName : " + entry.getValue().getClassName());
-            out.println("MethodName : " + entry.getValue().getMethod() + "\n");
-        }
-
-        out.println("Key : " + k);
-        out.println("Class name : " + map.getClassName());
-
         try {
             Class process_class = Class.forName(map.getClassName());
-            Object objet = process_class.getConstructor().newInstance();
+            Object objet = null;
+
+            if (isSIngleton(process_class)) {
+                objet = singleton.get(process_class);
+            } else {
+                objet = process_class.getConstructor().newInstance();
+            }
+
             Method method = Inc.getMethode(process_class, map.getMethod(), k);
             HashMap<String, Object> fetchedData = new HashMap<>();
             ArrayList<String> inputFiedlsdNames = Inc.getInputFiedlsdNames(req);
@@ -116,8 +118,8 @@ public class FrontServlet extends HttpServlet {
                     out.println(e);
                 }
 
-                // RequestDispatcher dispatcher = req.getRequestDispatcher(modelview.getView());
-                // dispatcher.forward(req, resp);
+                RequestDispatcher dispatcher = req.getRequestDispatcher(modelview.getView());
+                dispatcher.forward(req, resp);
             }
 
         } catch (Exception e) {
@@ -188,7 +190,7 @@ public class FrontServlet extends HttpServlet {
                 e.printStackTrace();
                 return null;
             }
-        }else{
+        } else {
             return null;
         }
     }
@@ -224,5 +226,13 @@ public class FrontServlet extends HttpServlet {
 
     public void setMappingURLS(HashMap<String, Mapping> mappingURLS) {
         this.mappingURLS = mappingURLS;
+    }
+
+    public HashMap<Class, Object> getSingleton() {
+        return singleton;
+    }
+
+    public void setSingleton(HashMap<Class, Object> singleton) {
+        this.singleton = singleton;
     }
 }
