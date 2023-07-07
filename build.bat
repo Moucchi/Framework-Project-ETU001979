@@ -23,7 +23,7 @@ cd %src_path%
 call compile.bat
 
 REM depalcement des .class vers le dossier build
-robocopy .\etu1979 %build_path%\etu1979\ /E
+robocopy .\etu1979 %build_path%\etu1979\ /E /IS /MOVE /IF *.class
 
 REM creation de la bibliotheque jar
 cd %build_path%
